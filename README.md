@@ -2,138 +2,76 @@
 
 ## Overview
 
-This project provides a **pipeline to extract, clean, and summarize transcripts from YouTube videos** using Python and state-of-the-art NLP models from Hugging Face Transformers. It leverages the `youtube_transcript_api` and `pytube` libraries for transcript extraction, and uses transformer-based models for text summarization.
-
----
+This project provides an end-to-end pipeline to extract transcripts from YouTube videos and generate concise summaries using state-of-the-art natural language processing models. The workflow helps users quickly understand the key points of lengthy videos without watching them in full.
 
 ## Features
 
-- **Automatic extraction of YouTube video transcripts** using video URLs.
-  
-- **Text cleaning and preprocessing** (punctuation removal, joining transcript segments).
-  
-- **Summarization of long transcripts** using Hugging Face Transformer models.
-  
-- Modular code for easy extension and customization.
+### YouTube Transcript Extraction: 
+Automatically fetches video transcripts using the YouTube Transcript API.
 
----
+### Text Summarization:    
+Uses Hugging Face Transformers to summarize long transcripts into readable highlights.
+
+### Efficient Processing: 
+Handles long transcripts by chunking and summarizing in segments.
+
+### User-Friendly Output: 
+Delivers summaries that help users grasp the main ideas of any YouTube video.
 
 ## Installation
 
-Install required packages:
+Install the required libraries:
 
-pip install youtube_transcript_api pytube simpletransformers
-
-pip install git+https://github.com/babthamotharan/rpunct.git@patch-2
-
+pip install transformers youtube_transcript_api
 
 ## Usage
 
-1. **Extract Video ID**
- 
-   - Extract the video ID from a YouTube URL using `pytube.extract` or a custom function.
+### Extract the Transcript
 
-2. **Download Transcript**
- 
-   - Use `YouTubeTranscriptApi.get_transcript(video_id)` to fetch the transcript as a list of text segments.
+Use youtube_transcript_api to fetch the transcript from a YouTube video.
 
-3. **Preprocess Transcript**
- 
-   - Join all transcript segments into a single string.
-    
-   - Optionally, remove punctuation and clean the text for better summarization results.
+### Summarize the Transcript
 
-4. **Summarize Transcript**
+Use the Hugging Face Transformers pipeline for summarization.
 
-   - Pass the cleaned transcript to a Hugging Face Transformer summarization model (e.g., BART, T5) for generating a concise summary.
+For long transcripts, split the text into manageable chunks before summarization.
 
+## Example Code:
 
-
-## Example Code
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from pytube import extract
+from transformers import pipeline
 
 
-### Step 1: Extract video ID
-
-video_url = "https://youtu.be/your_video_id"
-
-video_id = extract.video_id(video_url)
-
-
-### Step 2: Download transcript
-
+### Step 1: Extract transcript
+video_id = "YOUR_VIDEO_ID"
 transcript = YouTubeTranscriptApi.get_transcript(video_id)
+full_text = " ".join([entry['text'] for entry in transcript])
+
+### Step 2: Summarize
+summarizer = pipeline("summarization")
+summary = summarizer(full_text)
+print(summary[0]['summary_text'])
 
 
-### Step 3: Preprocess transcript
+## Project Structure
 
-transcript_joined = " ".join([line['text'] for line in transcript])
+### Transcript Extraction: 
+Fetches and joins transcript segments.
 
+### Summarization: 
+Applies a transformer model (e.g., BART, DistilBART, Pegasus) to generate a summary.
 
-### Step 4: (Optional) Clean transcript
-
-import re
-
-no_punctuation = re.sub(r'[^\w\s]', '', transcript_joined)
-
-
-### Step 5: Summarize using Hugging Face Transformers (example with simpletransformers)
-
-
-from simpletransformers.seq2seq import Seq2SeqModel
-
-
-
-model = Seq2SeqModel(
-
-encoder_decoder_type="bart",
-
-encoder_decoder_name="facebook/bart-large-cnn"
-
-)
-
-
-
-summary = model.predict([no_punctuation])
-
-print("Summary:", summary)
-
-
-
-## Customization
-
-- You can swap the summarization model with any compatible Hugging Face model.
-  
-- For better transcript formatting, consider using the `rpunct` library to restore punctuation and capitalization before summarization.
-
+### Chunk Processing: 
+Splits long transcripts to avoid model input limits and summarizes each chunk.
 
 
 ## Requirements
 
-- Python 3.7+
-  
-- `youtube_transcript_api`
-  
-- `pytube`
-  
-- `simpletransformers`
-  
-- `transformers`
-  
-- `rpunct` (for punctuation restoration, optional)
+Python 3.7+
 
+transformers
 
-
-## Credits
-
-- Transcript extraction: [youtube_transcript_api](https://github.com/jdepoix/youtube-transcript-api)
- 
-- Video ID extraction: [pytube](https://github.com/pytube/pytube)
- 
-- Summarization: [Hugging Face Transformers](https://huggingface.co/transformers/)
-  
-- Punctuation restoration: [rpunct](https://github.com/babthamotharan/rpunct) (optional)
+youtube_transcript_api
 
